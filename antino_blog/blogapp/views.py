@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -6,13 +7,13 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Blog, Like, Comment
 from .serializers import CommentSerializer, BlogSerializer, LikesSerializer
 from django.core.mail import send_mail
+from django.db.models.functions import TruncMonth, TruncWeek, TruncQuarter, TruncYear
 from datetime import datetime, timedelta
 from django.shortcuts import get_object_or_404
 from apscheduler.schedulers.background import BackgroundScheduler
 from django.db.models import Count
-from django.shortcuts import render
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 class BlogsView(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication]
@@ -95,7 +96,6 @@ class CommentWriteView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 # SENDING EMAIL FOR LIKE
-    
 scheduler = BackgroundScheduler()
 scheduler.start()
 
@@ -117,19 +117,58 @@ def schedule_like_notification(user_email, blog_title):
         id=f'{user_email}_{blog_title}'
     )
 
-def blog_chart(request):
-    # Calculate the date range for the last 7 days
+# Weekly Chart
+def blog_weekly_chart(request):
     end_date = timezone.now().date()
-    start_date = end_date - timedelta(days=6)
+    start_date = end_date - timedelta(weeks=1)
 
-    # Query to get the count of blogs added per day
     blog_count_per_day = Blog.objects.filter(created_at__date__range=[start_date, end_date]) \
-        .extra({'created_at_day': 'date(created_at)'}) \
-        .values('created_at_day') \
-        .annotate(blog_count=Count('id'))
+                                      .annotate(date=TruncWeek('created_at')) \
+                                      .values('date') \
+                                      .annotate(count=Count('id'))
 
-    # Prepare data for the chart
-    labels = [entry['created_at_day'].strftime('%Y-%m-%d') for entry in blog_count_per_day]
-    data = [entry['blog_count'] for entry in blog_count_per_day]
+    data = [{'date': entry['date'].strftime('%Y-%m-%d'), 'count': entry['count']} for entry in blog_count_per_day]
 
-    return render(request, '.antino_blog/adminui/templates/admin/summary_chart.html', {'labels': labels, 'data': data})
+    return JsonResponse(data, safe=False)
+
+# Monthly Chart
+def blog_monthly_chart(request):
+    end_date = timezone.now().date()
+    start_date = end_date - timedelta(days=30)
+
+    blog_count_per_month = Blog.objects.filter(created_at__date__range=[start_date, end_date]) \
+                                        .annotate(month=TruncMonth('created_at')) \
+                                        .values('month') \
+                                        .annotate(count=Count('id'))
+
+    data = [{'month': entry['month'].strftime('%Y-%m'), 'count': entry['count']} for entry in blog_count_per_month]
+
+    return JsonResponse(data, safe=False)
+
+# Quarterly Chart
+def blog_quarterly_chart(request):
+    end_date = timezone.now().date()
+    start_date = end_date - timedelta(days=365)
+
+    blog_count_per_quarter = Blog.objects.filter(created_at__date__range=[start_date, end_date]) \
+                                         .annotate(quarter=TruncQuarter('created_at')) \
+                                         .values('quarter') \
+                                         .annotate(count=Count('id'))
+
+    data = [{'quarter': entry['quarter'].strftime('%Y-%m-%d'), 'count': entry['count']} for entry in blog_count_per_quarter]
+
+    return JsonResponse(data, safe=False)
+
+# Yearly Chart
+def blog_yearly_chart(request):
+    end_date = timezone.now().date()
+    start_date = end_date - timedelta(days=365*2)  # Consider two years for yearly chart
+
+    blog_count_per_year = Blog.objects.filter(created_at__date__range=[start_date, end_date]) \
+                                      .annotate(year=TruncYear('created_at')) \
+                                      .values('year') \
+                                      .annotate(count=Count('id'))
+
+    data = [{'year': entry['year'].strftime('%Y'), 'count': entry['count']} for entry in blog_count_per_year]
+
+    return JsonResponse(data, safe=False)

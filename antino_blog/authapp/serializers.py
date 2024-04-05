@@ -2,8 +2,8 @@ from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 from .models import MyUser
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
-from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
-from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+# from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
+# from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -95,32 +95,32 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
             raise ValidationError('You are not a Registered User')
         return super().validate(attrs)
     
-class UserPasswordResetSerializer(serializers.Serializer):
-    new_password = serializers.CharField(max_length=255, style={'input_type': 'password'}, write_only=True)
-    re_password = serializers.CharField(max_length=255, style={'input_type': 'password'}, write_only=True)
+# class UserPasswordResetSerializer(serializers.Serializer):
+#     new_password = serializers.CharField(max_length=255, style={'input_type': 'password'}, write_only=True)
+#     re_password = serializers.CharField(max_length=255, style={'input_type': 'password'}, write_only=True)
 
-    class Meta:
-        fields = ['new_password', 're_password']
+#     class Meta:
+#         fields = ['new_password', 're_password']
 
-    def validate(self, attrs):
-        try:
-            new_password = serializers.CharField(max_length=255)
-            re_password = serializers.CharField(max_length=255)
+#     def validate(self, attrs):
+#         try:
+#             new_password = serializers.CharField(max_length=255)
+#             re_password = serializers.CharField(max_length=255)
 
-            uid = self.context.get(uid)
-            token = self.context.get(token)
+#             uid = self.context.get(uid)
+#             token = self.context.get(token)
 
-            if new_password != re_password:
-                raise serializers.ValidationError("Password Dosen't Match!")
+#             if new_password != re_password:
+#                 raise serializers.ValidationError("Password Dosen't Match!")
 
-            id = smart_str(urlsafe_base64_decode(uid))
-            user = MyUser.objects.filter(id=id)
+#             id = smart_str(urlsafe_base64_decode(uid))
+#             user = MyUser.objects.filter(id=id)
 
-            if not PasswordResetTokenGenerator().check_token(user, token):
-                raise ValidationError('Token is not Valid or Expired!')
-            user.set_password(new_password)
-            user.save()
-            return attrs
-        except DjangoUnicodeDecodeError as identifier:
-            PasswordResetTokenGenerator().check_token(user, token)
-            raise ValidationError('Token is not Valid or Expired!')
+#             if not PasswordResetTokenGenerator().check_token(user, token):
+#                 raise ValidationError('Token is not Valid or Expired!')
+#             user.set_password(new_password)
+#             user.save()
+#             return attrs
+#         except DjangoUnicodeDecodeError as identifier:
+#             PasswordResetTokenGenerator().check_token(user, token)
+#             raise ValidationError('Token is not Valid or Expired!')

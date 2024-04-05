@@ -2,6 +2,7 @@ from django.db import models
 from authapp.models import MyUser
 
 class Blog(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
     title = models.CharField(max_length=100)
     description = models.TextField()
     author = models.ForeignKey(MyUser, on_delete = models.CASCADE)

@@ -28,13 +28,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'blogapp',
-    'authapp',
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    'jet',
-    'jet.dashboard'
+    'blogapp',
+    'authapp'
 ]
 
 # JWT Configuration

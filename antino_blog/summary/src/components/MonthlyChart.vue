@@ -1,0 +1,93 @@
+<template>
+    <div class="container" style="text-align: center;">
+        <canvas class="canvas" ref="blogChart" width="400" height="200"></canvas>
+    </div>
+</template>
+
+<script>
+import axios from 'axios';
+import Chart from 'chart.js/auto';
+
+export default {
+    data() {
+        return {
+            blogData: [],
+            blogChart: null
+        };
+    },
+    mounted() {
+        this.fetchBlogData();
+    },
+    methods: {
+        fetchBlogData() {
+            axios.get('http://127.0.0.1:8000/blog-monthly-chart/')
+                .then(response => {
+                    this.blogData = response.data;
+                })
+                .catch(error => {
+                    console.error('Error fetching blog data:', error);
+                });
+        },
+        createChart() {
+            if (this.blogData.length === 0) {
+                return;
+            }
+            const ctx = this.$refs.blogChart.getContext('2d');
+            this.blogChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: this.blogData.map(entry => entry.month),
+                    datasets: [{
+                        label: 'Number of Blogs Uploaded',
+                        data: this.blogData.map(entry => entry.count),
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        barThickness: 100
+                    }]
+                },
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                precision: 0,
+                                stepSize: 1
+                            },
+                            gridLines: {
+                                color: "rgba(0, 0, 0, 0)",
+                            }
+                        }],
+                        xAxes: [{
+                            gridLines: {
+                                color: "rgba(0, 0, 0, 0)",
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+    },
+    watch: {
+        blogData: {
+            immediate: true,
+            handler() {
+                this.createChart();
+            }
+        }
+    }
+};
+</script>
+
+<style scoped>
+.container {
+    margin: 100px auto;
+    height: 70%;
+    width: 80%;
+}
+
+.canvas {
+    height: 500px !important;
+    width: 700px !important;
+}
+</style>

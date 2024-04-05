@@ -5,7 +5,7 @@
 
 {% block coltype %}colMS{% endblock %}
 
-{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}  
 
 {% block nav-breadcrumbs %}{% endblock %}
 
@@ -49,7 +49,16 @@
             <h2>{% translate 'Summary Chart' %}</h2>
             <ul class="actionlist">
                 <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
-                    <a class="btn btn-secondary btn-sm" href="{% url 'blog_chart' %}">Blog Chart</a>
+                    <a class="btn btn-light btn-sm" href="http://192.168.11.142:8080/weekly_report" style="width: 150px;">Weekly Report</a>
+                </li>
+                <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                    <a class="btn btn-light btn-sm" href="http://192.168.11.142:8080/monthly_report" style="width: 150px;">Monthly Report</a>
+                </li>
+                <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                    <a class="btn btn-light btn-sm" href="http://192.168.11.142:8080/quaterly_report" style="width: 150px;">Quaterly Report</a>
+                </li>
+                <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                        <a class="btn btn-light btn-sm" href="http://192.168.11.142:8080/yearly_report" style="width: 150px;">Yearly Report</a>                    
                 </li>
             </ul>
     </div>
